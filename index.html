@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ETF 期权助手 — 交互原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>ETF 期权助手</h1>
+      <p class="sub">交易辅助工具 · HTML 原型 v1.5</p>
+      <button class="nav-item active" data-page="home">首页</button>
+      <button class="nav-item" data-page="heatmap">IV 热力图</button>
+      <button class="nav-item" data-page="tquote">T 型报价</button>
+      <button class="nav-item" data-page="tradelist">交易列表</button>
+      <button class="nav-item" data-page="settings">设置</button>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <h2 id="page-title">首页</h2>
+        <div class="topbar-actions">
+          <div id="analysis-toolbar" style="display:none; align-items:center; gap:10px;">
+            <select id="underlying-select" class="chip">
+              <option value="510050">510050 50ETF</option>
+              <option value="510300">510300 300ETF</option>
+              <option value="510500" selected>510500 500ETF</option>
+            </select>
+            <span class="chip" id="month-chip">挂牌月份: 4个</span>
+            <div id="month-tabs" class="month-tabs" style="display:none;"></div>
+            <button class="chip" id="btn-refresh">刷新</button>
+          </div>
+          <span><span class="status-dot"></span><span class="muted">行情正常</span></span>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- 首页 -->
+        <section id="page-home" class="page active">
+          <p class="muted" style="margin-top:0">同时展示所有可交易 ETF 标的的现价与 60 日蜡烛图，点击卡片进入期权分析</p>
+          <div id="home-grid" class="home-grid"></div>
+        </section>
+
+        <!-- IV 热力图 -->
+        <section id="page-heatmap" class="page page-split">
+          <div class="split-quote-pane">
+            <div class="legend-row">
+              <span class="muted" id="heatmap-subtitle"></span>
+              <div class="scale-bar" aria-hidden="true">
+                <span style="background:#fef2f2"></span>
+                <span style="background:#fecaca"></span>
+                <span style="background:#f87171"></span>
+                <span style="background:#dc2626"></span>
+                <span style="background:#991b1b"></span>
+              </div>
+            </div>
+
+            <div class="heatmap-wrap">
+              <table class="heatmap-table">
+                <thead id="heatmap-head"></thead>
+                <tbody id="heatmap-body"></tbody>
+              </table>
+            </div>
+
+            <div class="hint-row">
+              <span>纵轴=4个挂牌月份(当月/下月/两季月) · 横轴=行权价±20% · 左侧沽(K&lt;S) · 右侧购(K≥S)</span>
+              <span class="up">■ 做多</span>
+              <span class="down">■ 做空</span>
+              <span>点击格子：做多 → 做空 → 移除</span>
+            </div>
+
+            <div class="note">* IV、Greeks 及热力图着色均以中间价 Mid = (买一 + 卖一) / 2 计算</div>
+          </div>
+
+          <div class="split-trade-pane">
+            <div class="trade-drawer">
+              <div class="trade-drawer-head">
+                <strong id="trade-summary-drawer">交易列表 (0)</strong>
+                <div class="trade-drawer-actions">
+                  <button class="btn btn-sm" id="btn-copy-heatmap">复制下单信息</button>
+                  <button class="btn btn-sm" id="btn-export-heatmap">导出 CSV</button>
+                  <button class="btn btn-sm btn-link" id="btn-goto-tradelist-heatmap">查看完整列表 →</button>
+                  <button class="btn btn-sm btn-disabled" disabled title="Phase 2: miniQMT 一键下单">一键下单</button>
+                </div>
+              </div>
+              <div class="trade-table-scroll">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>合约</th><th>方向</th><th>报价方式</th><th>数量</th><th>委托价</th>
+                      <th>IV</th><th>Δ</th><th>Γ</th><th>Θ</th><th>V</th><th>权利金</th><th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="trade-body-drawer"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- T 型报价 -->
+        <section id="page-tquote" class="page page-split">
+          <div class="split-quote-pane">
+            <p class="muted split-intro">T 型报价 — 顶栏切换到期月份；点击购/沽侧单元格三态点选；Greeks 均以中间价计算</p>
+            <div class="tquote-scroll">
+              <table class="data-table tquote-table">
+                <thead>
+                  <tr>
+                    <th>C买</th><th>C卖</th><th>CIV</th><th>CΔ</th><th>CΓ</th><th>CΘ</th><th>CV</th>
+                    <th>K</th>
+                    <th>P买</th><th>P卖</th><th>PIV</th><th>PΔ</th><th>PΓ</th><th>PΘ</th><th>PV</th>
+                  </tr>
+                </thead>
+                <tbody id="tquote-body"></tbody>
+              </table>
+            </div>
+            <div class="note">所有 IV、Delta、Gamma、Theta、Vega 均基于中间价反解/计算</div>
+          </div>
+
+          <div class="split-trade-pane">
+            <div class="trade-drawer">
+              <div class="trade-drawer-head">
+                <strong id="trade-summary-drawer-tquote">交易列表 (0)</strong>
+                <div class="trade-drawer-actions">
+                  <button class="btn btn-sm" id="btn-copy-tquote">复制下单信息</button>
+                  <button class="btn btn-sm" id="btn-export-tquote">导出 CSV</button>
+                  <button class="btn btn-sm btn-link" id="btn-goto-tradelist-tquote">查看完整列表 →</button>
+                  <button class="btn btn-sm btn-disabled" disabled title="Phase 2: miniQMT 一键下单">一键下单</button>
+                </div>
+              </div>
+              <div class="trade-table-scroll">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>合约</th><th>方向</th><th>报价方式</th><th>数量</th><th>委托价</th>
+                      <th>IV</th><th>Δ</th><th>Γ</th><th>Θ</th><th>V</th><th>权利金</th><th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="trade-body-drawer-tquote"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 交易列表 -->
+        <section id="page-tradelist" class="page">
+          <p id="trade-summary-page" class="muted" style="margin-top:0">交易列表 (0)</p>
+          <div style="margin-bottom:12px">
+            <button class="btn" id="btn-copy-page">复制下单信息</button>
+            <button class="btn" style="margin-left:8px" id="btn-export-page">导出 CSV</button>
+            <button class="btn btn-disabled" disabled style="margin-left:8px" title="Phase 2: miniQMT">一键下单</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>合约</th><th>方向</th><th>报价方式</th><th>数量</th><th>委托价</th>
+                <th>IV</th><th>Δ</th><th>Γ</th><th>Θ</th><th>V</th><th>权利金</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="trade-body-page"></tbody>
+          </table>
+          <div class="note">委托价按报价方式计算；IV/Greeks 展示值基于中间价</div>
+        </section>
+
+        <!-- 设置 -->
+        <section id="page-settings" class="page">
+          <p class="muted" style="margin-top:0">参数修改后自动保存；期权链报价（热力图/T 型）不自动刷新，仅进入页面或点击刷新时更新</p>
+          <div class="setting-row">
+            <span>无风险利率 r</span>
+            <div class="setting-input-wrap">
+              <input type="number" id="setting-r" class="setting-input" step="0.001" min="0" max="1" />
+            </div>
+          </div>
+          <div class="setting-row">
+            <span>分红率 q</span>
+            <div class="setting-input-wrap">
+              <input type="number" id="setting-q" class="setting-input" step="0.001" min="0" max="1" />
+            </div>
+          </div>
+          <div class="setting-row">
+            <span>行情刷新频率</span>
+            <div class="setting-input-wrap">
+              <input type="number" id="setting-quote-refresh" class="setting-input" step="1" min="3" max="300" />
+              <span class="muted">秒（期权链报价不自动刷新，预留）</span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <span>首页刷新频率</span>
+            <div class="setting-input-wrap">
+              <input type="number" id="setting-home-refresh" class="setting-input" step="1" min="5" max="600" />
+              <span class="muted">秒（首页自动刷新）</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
