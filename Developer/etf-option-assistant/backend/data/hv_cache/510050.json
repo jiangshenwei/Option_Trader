@@ -1,0 +1,11 @@
+{
+  "underlying": "510050",
+  "hv20": 22.8,
+  "vmin": 17.5,
+  "vmax": 31.2,
+  "history_start": "2016-09-10",
+  "history_end": "2026-09-08",
+  "trading_days": 2520,
+  "source": "mock",
+  "computed_at": "2026-09-08"
+}

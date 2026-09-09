@@ -1,0 +1,7 @@
+{
+  "r": 0.02,
+  "q": 0.0,
+  "quote_refresh_sec": 8,
+  "home_refresh_sec": 30,
+  "show_non_standard": false
+}
